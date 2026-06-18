@@ -271,7 +271,15 @@ function renderStep() {
         
         <div style="display: flex; flex-direction: column; gap: 16px;">
           <div style="display: flex; flex-direction: column; gap: 8px;">
-            <label for="visit-meta" style="font-weight: 700; font-size: 1.1rem;">Meta do Assistido</label>
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap;">
+              <label for="visit-meta" style="font-weight: 700; font-size: 1.1rem;">Meta do Assistido</label>
+              <button type="button" id="btn-voice-meta" class="btn-mic" aria-label="Falar meta">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="18" height="18" style="flex-shrink: 0;">
+                  <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/>
+                </svg>
+                <span id="btn-mic-meta-text">Falar</span>
+              </button>
+            </div>
             <input type="text" id="visit-meta" placeholder="Ex: Caminhar 20 minutos todos os dias" style="padding: 12px; font-size: 1.1rem; border-radius: var(--border-radius-md); border: 2px solid var(--surface-border); min-height: var(--touch-target); width: 100%;">
           </div>
           
@@ -286,58 +294,72 @@ function renderStep() {
     formContainer.appendChild(formWrapper);
 
     // Lógica do Microfone (Speech-to-Text) com Web Speech API
-    const btnMic = document.getElementById('btn-voice-relato');
-    const micText = document.getElementById('btn-mic-text');
-    const textarea = document.getElementById('visit-relato');
-
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-    if (SpeechRecognition) {
-      const recognition = new SpeechRecognition();
-      recognition.lang = 'pt-BR';
-      recognition.interimResults = false;
-      recognition.continuous = false;
+    const setupMic = (btnId, textId, inputId) => {
+      const btn = document.getElementById(btnId);
+      const txt = document.getElementById(textId);
+      const inp = document.getElementById(inputId);
 
-      recognition.onstart = () => {
-        btnMic.classList.add('recording');
-        micText.textContent = 'Ouvindo...';
-      };
+      if (SpeechRecognition) {
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'pt-BR';
+        recognition.interimResults = false;
+        recognition.continuous = false;
 
-      recognition.onend = () => {
-        btnMic.classList.remove('recording');
-        micText.textContent = 'Falar';
-      };
+        recognition.onstart = () => {
+          btn.classList.add('recording');
+          txt.textContent = 'Ouvindo...';
+        };
 
-      recognition.onerror = (e) => {
-        console.error('Erro de gravação:', e);
-        btnMic.classList.remove('recording');
-        micText.textContent = 'Erro';
-        alert('Não foi possível reconhecer a voz. Verifique as permissões de microfone do seu navegador.');
-      };
+        recognition.onend = () => {
+          btn.classList.remove('recording');
+          txt.textContent = 'Falar';
+        };
 
-      recognition.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
-        if (textarea.value.trim() === '') {
-          textarea.value = transcript;
-        } else {
-          textarea.value += ' ' + transcript;
-        }
-      };
+        recognition.onerror = (e) => {
+          console.error('Erro de gravação:', e);
+          btn.classList.remove('recording');
+          txt.textContent = 'Erro';
+          alert('Não foi possível reconhecer a voz. Verifique as permissões de microfone do seu navegador.');
+        };
 
-      btnMic.addEventListener('click', () => {
-        if (btnMic.classList.contains('recording')) {
-          recognition.stop();
-        } else {
-          recognition.start();
-        }
-      });
-    } else {
-      // Navegador incompatível (ex: Firefox Desktop)
-      btnMic.style.opacity = '0.6';
-      btnMic.title = 'Reconhecimento de voz não suportado neste navegador.';
-      btnMic.addEventListener('click', () => {
-        alert('O ditado por voz não é suportado pelo seu navegador atual. Recomendamos o uso do Google Chrome, Safari ou navegadores móveis modernos.');
-      });
-    }
+        recognition.onresult = (event) => {
+          const transcript = event.results[0][0].transcript;
+          if (inp.value.trim() === '') {
+            inp.value = transcript;
+          } else {
+            inp.value += ' ' + transcript;
+          }
+        };
+
+        btn.addEventListener('click', () => {
+          // Desativar outra gravação ativa se houver
+          document.querySelectorAll('.btn-mic.recording').forEach(activeBtn => {
+            if (activeBtn !== btn) {
+              activeBtn.classList.remove('recording');
+              // O evento onend ou o próprio navegador se encarrega de fechar
+            }
+          });
+
+          if (btn.classList.contains('recording')) {
+            recognition.stop();
+          } else {
+            recognition.start();
+          }
+        });
+      } else {
+        // Navegador incompatível (ex: Firefox Desktop)
+        btn.style.opacity = '0.6';
+        btn.title = 'Reconhecimento de voz não suportado neste navegador.';
+        btn.addEventListener('click', () => {
+          alert('O ditado por voz não é suportado pelo seu navegador atual. Recomendamos o uso do Google Chrome, Safari ou navegadores móveis modernos.');
+        });
+      }
+    };
+
+    // Inicializa microfones para ambos os campos
+    setupMic('btn-voice-relato', 'btn-mic-text', 'visit-relato');
+    setupMic('btn-voice-meta', 'btn-mic-meta-text', 'visit-meta');
   }
 }
