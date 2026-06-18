@@ -41,35 +41,32 @@
 
         <!-- Conteúdo Principal Dinâmico -->
         <div class="flow-content" id="flow-content-area">
-          <h2 class="flow-title" id="flow-content-title">Selecione os Vicentinos</h2>
+          <h2 class="flow-title" id="flow-content-title">Bem-vindo ao Gestor SSVP</h2>
           <p class="flow-description" id="flow-content-desc">
-            Selecione pelo menos 2 vicentinos que farão a visita hoje.
+            Acompanhe e registre visitas vicentinas de forma simples, acessível e totalmente offline.
           </p>
 
           <!-- Espaço para Controles/Formulários Dinâmicos (Mockado para V0.1.1) -->
           <div id="dynamic-form-container" style="display: flex; flex-direction: column; gap: 16px; margin-top: 24px;">
-            <!-- Opções Grandes para Fácil Toque -->
-            <label style="display: flex; align-items: center; gap: 16px; padding: 18px; border: 2px solid var(--primary); border-radius: var(--border-radius-md); background: var(--primary-light); cursor: pointer; min-height: var(--touch-target);">
-              <input type="checkbox" name="vicentino" value="1" checked style="width: 24px; height: 24px; cursor: pointer;" aria-label="Antônio Silva">
-              <span style="font-weight: 600; font-size: 1.2rem; color: var(--text-main);">Antônio Silva (Você)</span>
-            </label>
-            
-            <label style="display: flex; align-items: center; gap: 16px; padding: 18px; border: 2px solid var(--surface-border); border-radius: var(--border-radius-md); cursor: pointer; min-height: var(--touch-target);">
-              <input type="checkbox" name="vicentino" value="2" style="width: 24px; height: 24px; cursor: pointer;" aria-label="Maria Souza">
-              <span style="font-weight: 600; font-size: 1.2rem; color: var(--text-main);">Maria Souza</span>
-            </label>
-            
-            <label style="display: flex; align-items: center; gap: 16px; padding: 18px; border: 2px solid var(--surface-border); border-radius: var(--border-radius-md); cursor: pointer; min-height: var(--touch-target);">
-              <input type="checkbox" name="vicentino" value="3" style="width: 24px; height: 24px; cursor: pointer;" aria-label="José Carlos">
-              <span style="font-weight: 600; font-size: 1.2rem; color: var(--text-main);">José Carlos</span>
-            </label>
+            <div style="background: var(--primary-light); padding: 20px; border-radius: var(--border-radius-md); border-left: 5px solid var(--primary); box-shadow: var(--shadow-sm);">
+              <h3 style="font-size: 1.25rem; color: var(--primary); margin-bottom: 8px; font-family: 'Outfit', sans-serif;">O que este aplicativo faz?</h3>
+              <p style="font-size: 1.05rem; color: var(--text-main); margin-bottom: 16px; line-height: 1.5;">
+                Auxilia conferências vicentinas a registrar relatos de visitas, acompanhar metas de promoção social para as famílias e sincronizar tudo com o Google Sheets, mesmo trabalhando sem conexão à internet.
+              </p>
+              <h3 style="font-size: 1.25rem; color: var(--primary); margin-bottom: 8px; font-family: 'Outfit', sans-serif;">Como usar em 3 passos simples:</h3>
+              <ol style="margin-left: 20px; font-size: 1.05rem; color: var(--text-main); display: flex; flex-direction: column; gap: 10px; line-height: 1.4;">
+                <li><strong>Escolha a Dupla:</strong> Selecione os vicentinos que farão a visita (mínimo de 2).</li>
+                <li><strong>Selecione a Família:</strong> Escolha o lar assistido cadastrado.</li>
+                <li><strong>Registre a Conversa:</strong> Digite o relato da visita e acompanhe/crie metas.</li>
+              </ol>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Ações de Navegação -->
       <footer class="flow-actions" id="flow-actions-footer">
-        <button class="btn btn-primary" id="btn-next">Continuar para Família</button>
+        <button class="btn btn-primary" id="btn-next">Iniciar Nova Visita</button>
         <button class="btn btn-secondary" id="btn-prev" style="display: none;">Voltar</button>
       </footer>
     </main>

@@ -5,7 +5,7 @@
 
 // Estado da Aplicação
 const state = {
-  currentStep: 1, // 1: Vicentinos, 2: Família, 3: Relato/Metas
+  currentStep: 0, // 0: Home/Boas-vindas, 1: Vicentinos, 2: Família, 3: Relato/Metas
   selectedVicentinos: [1],
   selectedFamily: null,
   visitDetails: {
@@ -48,7 +48,9 @@ document.addEventListener('DOMContentLoaded', () => {
 // Setup de Eventos Globais
 function setupEventListeners() {
   btnNext.addEventListener('click', () => {
-    if (state.currentStep === 1) {
+    if (state.currentStep === 0) {
+      state.currentStep = 1;
+    } else if (state.currentStep === 1) {
       // Validar seleção de pelo menos 2 vicentinos
       const checkedVicentinos = Array.from(document.querySelectorAll('input[name="vicentino"]:checked'))
         .map(input => parseInt(input.value));
@@ -84,8 +86,8 @@ function setupEventListeners() {
       state.visitDetails.metaDate = metaDateVal;
 
       alert('Visita registrada com sucesso! (Fluxo Local Simulado V0.1.1)');
-      // Reiniciar fluxo
-      state.currentStep = 1;
+      // Reiniciar fluxo para a página inicial
+      state.currentStep = 0;
       state.selectedVicentinos = [1];
       state.selectedFamily = null;
     }
@@ -94,7 +96,7 @@ function setupEventListeners() {
   });
 
   btnPrev.addEventListener('click', () => {
-    if (state.currentStep > 1) {
+    if (state.currentStep > 0) {
       state.currentStep--;
       renderStep();
     }
@@ -103,16 +105,28 @@ function setupEventListeners() {
 
 // Renderização Dinâmica de Telas
 function renderStep() {
+  const stepIndicator = document.querySelector('.flow-step-indicator');
+
   // Atualizar Indicador de Progresso
-  stepLabel.textContent = `Passo ${state.currentStep} de 3`;
-  stepProgress.style.width = `${(state.currentStep / 3) * 100}%`;
+  if (state.currentStep === 0) {
+    if (stepIndicator) stepIndicator.style.display = 'none';
+  } else {
+    if (stepIndicator) stepIndicator.style.display = 'flex';
+    stepLabel.textContent = `Passo ${state.currentStep} de 3`;
+    stepProgress.style.width = `${(state.currentStep / 3) * 100}%`;
+  }
 
   // Mostrar/Ocultar botão Voltar
-  if (state.currentStep === 1) {
+  if (state.currentStep === 0) {
     btnPrev.style.display = 'none';
+    btnNext.textContent = 'Iniciar Nova Visita';
+  } else if (state.currentStep === 1) {
+    btnPrev.style.display = 'block';
+    btnPrev.textContent = 'Voltar para Início';
     btnNext.textContent = 'Continuar para Família';
   } else {
     btnPrev.style.display = 'block';
+    btnPrev.textContent = 'Voltar';
     if (state.currentStep === 2) {
       btnNext.textContent = 'Continuar para Relato';
     } else {
@@ -124,7 +138,27 @@ function renderStep() {
   formContainer.innerHTML = '';
 
   // Renderizar de acordo com o passo atual
-  if (state.currentStep === 1) {
+  if (state.currentStep === 0) {
+    flowTitle.textContent = 'Bem-vindo ao Gestor SSVP';
+    flowDesc.textContent = 'Acompanhe e registre visitas vicentinas de forma simples, acessível e totalmente offline.';
+
+    const welcomeCard = document.createElement('div');
+    welcomeCard.style.cssText = 'background: var(--primary-light); padding: 20px; border-radius: var(--border-radius-md); border-left: 5px solid var(--primary); box-shadow: var(--shadow-sm);';
+    welcomeCard.innerHTML = `
+      <h3 style="font-size: 1.25rem; color: var(--primary); margin-bottom: 8px; font-family: 'Outfit', sans-serif;">O que este aplicativo faz?</h3>
+      <p style="font-size: 1.05rem; color: var(--text-main); margin-bottom: 16px; line-height: 1.5;">
+        Auxilia conferências vicentinas a registrar relatos de visitas, acompanhar metas de promoção social para as famílias e sincronizar tudo com o Google Sheets, mesmo trabalhando sem conexão à internet.
+      </p>
+      <h3 style="font-size: 1.25rem; color: var(--primary); margin-bottom: 8px; font-family: 'Outfit', sans-serif;">Como usar em 3 passos simples:</h3>
+      <ol style="margin-left: 20px; font-size: 1.05rem; color: var(--text-main); display: flex; flex-direction: column; gap: 10px; line-height: 1.4;">
+        <li><strong>Escolha a Dupla:</strong> Selecione os vicentinos que farão a visita (mínimo de 2).</li>
+        <li><strong>Selecione a Família:</strong> Escolha o lar assistido cadastrado.</li>
+        <li><strong>Registre a Conversa:</strong> Digite o relato da visita e acompanhe/crie metas.</li>
+      </ol>
+    `;
+    formContainer.appendChild(welcomeCard);
+
+  } else if (state.currentStep === 1) {
     flowTitle.textContent = 'Selecione os Vicentinos';
     flowDesc.textContent = 'Selecione pelo menos 2 vicentinos que farão a visita hoje.';
 
