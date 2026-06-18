@@ -1,0 +1,282 @@
+/* ==========================================================================
+   Design System - SSVP Web App (Foco em Acessibilidade e Estética Premium)
+   ========================================================================== */
+
+/* Importação de Fontes Premium do Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap');
+
+:root {
+  /* Paleta de Cores Harmônica e de Alto Contraste (Baseada em HSL) */
+  --primary: hsl(215, 75%, 42%);      /* Azul Vicentino Principal (Confiança e Ação) */
+  --primary-hover: hsl(215, 85%, 32%);
+  --primary-light: hsl(215, 90%, 95%);
+  --primary-glow: hsla(215, 75%, 42%, 0.15);
+
+  --accent: hsl(35, 90%, 50%);         /* Amarelo/Dourado Quente para Destaques e Metas */
+  --accent-hover: hsl(35, 100%, 42%);
+
+  --background: hsl(210, 30%, 98%);    /* Fundo Claro Confortável */
+  --surface: hsl(0, 0%, 100%);         /* Superfície de Cards */
+  --surface-border: hsl(210, 14%, 89%);
+  
+  --text-main: hsl(222, 47%, 11%);     /* Texto de Altíssimo Contraste (Acessibilidade) */
+  --text-muted: hsl(220, 16%, 36%);
+  --text-on-primary: hsl(0, 0%, 100%);
+
+  --success: hsl(142, 72%, 29%);       /* Verde para Metas Cumpridas */
+  --danger: hsl(354, 70%, 45%);        /* Vermelho para Alertas/Não Cumpridas */
+
+  /* Espaçamentos e Acessibilidade de Toque */
+  --touch-target: 48px;                /* Altura/largura mínima de toque recomendada pela W3C */
+  --border-radius-lg: 16px;
+  --border-radius-md: 12px;
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 8px 24px rgba(13, 37, 86, 0.08);
+
+  /* Transições Micro-animadas */
+  --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Suporte Automático a Tema Escuro (Dark Mode) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --primary: hsl(215, 85%, 55%);
+    --primary-hover: hsl(215, 90%, 65%);
+    --primary-light: hsl(215, 30%, 15%);
+    --primary-glow: hsla(215, 85%, 55%, 0.2);
+
+    --background: hsl(222, 47%, 8%);
+    --surface: hsl(222, 40%, 12%);
+    --surface-border: hsl(222, 30%, 18%);
+
+    --text-main: hsl(210, 40%, 98%);
+    --text-muted: hsl(215, 20%, 75%);
+
+    --success: hsl(142, 68%, 45%);
+    --danger: hsl(354, 80%, 60%);
+
+    --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.4);
+  }
+}
+
+/* Reset Moderno */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: var(--background);
+  color: var(--text-main);
+  line-height: 1.6;
+  font-size: 1.125rem; /* ~18px base para melhor legibilidade de idosos */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  color: var(--text-main);
+  line-height: 1.25;
+}
+
+/* Layout Principal */
+.app-container {
+  max-width: 600px; /* Largura focada para uso em celular (Mobile-First) */
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: 16px;
+  position: relative;
+}
+
+/* Cabeçalho Premium */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 24px;
+  backdrop-filter: blur(10px);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-icon {
+  width: 40px;
+  height: 40px;
+  background: var(--primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-on-primary);
+  font-weight: bold;
+  font-size: 1.5rem;
+  box-shadow: 0 4px 12px var(--primary-glow);
+}
+
+.brand-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+.brand-subtitle {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
+}
+
+/* Container do Fluxo Guiado */
+.flow-card {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--border-radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 400px;
+}
+
+.flow-step-indicator {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.step-badge {
+  background: var(--primary-light);
+  color: var(--primary);
+  padding: 6px 16px;
+  border-radius: 30px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  font-family: 'Outfit', sans-serif;
+}
+
+.step-progress-bar {
+  flex: 1;
+  height: 6px;
+  background: var(--surface-border);
+  margin: 0 16px;
+  border-radius: 3px;
+  position: relative;
+  overflow: hidden;
+}
+
+.step-progress-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  background: var(--primary);
+  width: 33.33%; /* Exemplo para passo 1 de 3 */
+  border-radius: 3px;
+  transition: var(--transition-smooth);
+}
+
+.flow-content {
+  flex: 1;
+  margin-bottom: 32px;
+}
+
+.flow-title {
+  font-size: 1.6rem;
+  margin-bottom: 16px;
+}
+
+.flow-description {
+  color: var(--text-muted);
+  margin-bottom: 24px;
+  font-size: 1.05rem;
+}
+
+/* Botões Grandes e Acessíveis (Foco em Cliques Fáceis) */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--touch-target);
+  padding: 12px 24px;
+  border-radius: var(--border-radius-md);
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  transition: var(--transition-smooth);
+  text-decoration: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.btn-primary {
+  background-color: var(--primary);
+  color: var(--text-on-primary);
+}
+
+.btn-primary:hover, .btn-primary:focus {
+  background-color: var(--primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px var(--primary-glow);
+  outline: 3px solid var(--accent); /* Destaque visual forte para acessibilidade */
+  outline-offset: 2px;
+}
+
+.btn-secondary {
+  background-color: transparent;
+  color: var(--primary);
+  border: 2px solid var(--primary);
+}
+
+.btn-secondary:hover, .btn-secondary:focus {
+  background-color: var(--primary-light);
+  transform: translateY(-2px);
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Ações Inferiores */
+.flow-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+@media (min-width: 480px) {
+  .flow-actions {
+    flex-direction: row-reverse;
+  }
+  
+  .flow-actions .btn {
+    flex: 1;
+  }
+}
+
+/* Efeito de Foco Geral para Navegação por Teclado ou Leitor */
+*:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}

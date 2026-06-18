@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SSVP Conferência - Gestão de Visitas</title>
+  <!-- SEO & Acessibilidade -->
+  <meta name="description" content="Web App de Gestão de Conferências e Visitas da Sociedade de São Vicente de Paulo (SSVP). Otimizado para acessibilidade e uso em trânsito.">
+  <meta name="theme-color" content="#1e58c7">
+  
+  <!-- Estilos Globais -->
+  <link rel="stylesheet" href="/src/styles/index.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Cabeçalho Principal -->
+    <header class="app-header" id="main-header">
+      <div class="brand">
+        <div class="brand-icon" aria-hidden="true">Ω</div>
+        <div>
+          <h1 class="brand-title">SSVP Gestão</h1>
+          <span class="brand-subtitle">Conferência Local</span>
+        </div>
+      </div>
+      <!-- Indicador Online/Offline (Futuro) -->
+      <div class="status-indicator-container">
+        <span class="step-badge" id="network-badge" style="background-color: var(--success); color: white;">Online</span>
+      </div>
+    </header>
+
+    <!-- Card Principal de Fluxo Guiado -->
+    <main class="flow-card" id="main-flow-card">
+      <div>
+        <!-- Indicador de Etapas -->
+        <div class="flow-step-indicator" aria-label="Progresso do Fluxo">
+          <span class="step-badge" id="step-label">Passo 1 de 3</span>
+          <div class="step-progress-bar">
+            <div class="step-progress-fill" id="step-progress" style="width: 33.33%;"></div>
+          </div>
+        </div>
+
+        <!-- Conteúdo Principal Dinâmico -->
+        <div class="flow-content" id="flow-content-area">
+          <h2 class="flow-title" id="flow-content-title">Selecione os Vicentinos</h2>
+          <p class="flow-description" id="flow-content-desc">
+            Selecione pelo menos 2 vicentinos que farão a visita hoje.
+          </p>
+
+          <!-- Espaço para Controles/Formulários Dinâmicos (Mockado para V0.1.1) -->
+          <div id="dynamic-form-container" style="display: flex; flex-direction: column; gap: 16px; margin-top: 24px;">
+            <!-- Opções Grandes para Fácil Toque -->
+            <label style="display: flex; align-items: center; gap: 16px; padding: 18px; border: 2px solid var(--primary); border-radius: var(--border-radius-md); background: var(--primary-light); cursor: pointer; min-height: var(--touch-target);">
+              <input type="checkbox" name="vicentino" value="1" checked style="width: 24px; height: 24px; cursor: pointer;" aria-label="Antônio Silva">
+              <span style="font-weight: 600; font-size: 1.2rem; color: var(--text-main);">Antônio Silva (Você)</span>
+            </label>
+            
+            <label style="display: flex; align-items: center; gap: 16px; padding: 18px; border: 2px solid var(--surface-border); border-radius: var(--border-radius-md); cursor: pointer; min-height: var(--touch-target);">
+              <input type="checkbox" name="vicentino" value="2" style="width: 24px; height: 24px; cursor: pointer;" aria-label="Maria Souza">
+              <span style="font-weight: 600; font-size: 1.2rem; color: var(--text-main);">Maria Souza</span>
+            </label>
+            
+            <label style="display: flex; align-items: center; gap: 16px; padding: 18px; border: 2px solid var(--surface-border); border-radius: var(--border-radius-md); cursor: pointer; min-height: var(--touch-target);">
+              <input type="checkbox" name="vicentino" value="3" style="width: 24px; height: 24px; cursor: pointer;" aria-label="José Carlos">
+              <span style="font-weight: 600; font-size: 1.2rem; color: var(--text-main);">José Carlos</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ações de Navegação -->
+      <footer class="flow-actions" id="flow-actions-footer">
+        <button class="btn btn-primary" id="btn-next">Continuar para Família</button>
+        <button class="btn btn-secondary" id="btn-prev" style="display: none;">Voltar</button>
+      </footer>
+    </main>
+  </div>
+
+  <!-- Script Principal -->
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
