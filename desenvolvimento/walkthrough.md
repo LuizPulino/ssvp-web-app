@@ -33,7 +33,7 @@ O servidor de desenvolvimento local está ativo em `http://localhost:3000`.
 
 1. **Escolher a Família e Ver Histórico**:
    * No menu principal, clique em **Iniciar Nova Visita**.
-   * Escolha pelo menos 2 vicentinos (Passo 1) e avance.
+   * Escolha os vicentinos (Passo 1). O app agora permite prosseguir com apenas 1 vicentino (exibindo uma confirmação de recomendação da SSVP) ou com 2 ou mais, e avance.
    * No Passo 2, selecione a **Família Silva Oliveira** (ela já possui metas padrão gravadas na base) e avance.
    * No Passo 3, observe:
      * **Meta Ativa**: Aparecerá para validação a meta *"Fazer matrícula no curso de Culinária"*.
