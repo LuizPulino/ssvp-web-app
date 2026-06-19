@@ -156,14 +156,22 @@ function handleFlowNext() {
   if (state.currentStep === 0) {
     state.currentStep = 1;
   } else if (state.currentStep === 1) {
-    // Validar seleção de pelo menos 2 vicentinos
+    // Validar seleção de vicentinos
     const checkedVicentinos = Array.from(document.querySelectorAll('input[name="vicentino"]:checked'))
       .map(input => parseInt(input.value));
     
-    if (checkedVicentinos.length < 2) {
-      alert('Por favor, selecione pelo menos 2 vicentinos para a visita (Acessibilidade: Visitas devem ser feitas em dupla/grupo).');
+    if (checkedVicentinos.length === 0) {
+      alert('Por favor, selecione pelo menos 1 vicentino que fará a visita hoje.');
       return;
     }
+
+    if (checkedVicentinos.length === 1) {
+      const prosseguir = confirm('Atenção: A SSVP recomenda fortemente que as visitas sejam feitas por pelo menos 2 vicentinos. Deseja prosseguir com apenas 1?');
+      if (!prosseguir) {
+        return;
+      }
+    }
+
     state.selectedVicentinos = checkedVicentinos;
     state.currentStep = 2;
   } else if (state.currentStep === 2) {
