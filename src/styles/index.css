@@ -458,3 +458,80 @@ h1, h2, h3, h4 {
   line-height: 1.4;
 }
 
+/* Grupo de botões de Validação de Meta (Sim/Não) */
+.val-btn-group {
+  display: flex;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.val-btn {
+  flex: 1;
+  min-height: var(--touch-target);
+  border-radius: var(--border-radius-md);
+  border: 2px solid var(--surface-border);
+  background: var(--surface);
+  color: var(--text-main);
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.val-btn:focus-visible {
+  outline: 3px solid var(--accent);
+}
+
+.val-btn-sim:hover, .val-btn-sim:focus, .val-btn-sim.active {
+  background-color: var(--success);
+  border-color: var(--success);
+  color: var(--text-on-primary);
+  box-shadow: 0 4px 12px hsla(142, 72%, 29%, 0.2);
+}
+
+.val-btn-nao:hover, .val-btn-nao:focus, .val-btn-nao.active {
+  background-color: var(--danger);
+  border-color: var(--danger);
+  color: var(--text-on-primary);
+  box-shadow: 0 4px 12px hsla(354, 70%, 45%, 0.2);
+}
+
+/* Cards de Metas Passadas (Acompanhamento) */
+.meta-past-card {
+  background-color: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--border-radius-md);
+  padding: 14px 18px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.meta-past-card.cumprida {
+  border-left: 5px solid var(--success);
+}
+
+.meta-past-card.nao-cumprida {
+  border-left: 5px solid var(--danger);
+  background-color: hsla(354, 70%, 45%, 0.04);
+}
+
+.meta-past-card.bloqueada {
+  border-left: 5px solid var(--text-muted);
+  opacity: 0.7;
+}
+
+.meta-status-title {
+  font-weight: 700;
+  font-size: 1.05rem;
+  font-family: 'Outfit', sans-serif;
+  color: var(--text-main);
+}
+
+
