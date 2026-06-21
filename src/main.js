@@ -351,7 +351,7 @@ async function handleLoginSubmit(e) {
   const isAuto = window.APPS_SCRIPT_WEB_APP_URL &&
     !window.APPS_SCRIPT_WEB_APP_URL.includes('<?=') &&
     window.APPS_SCRIPT_WEB_APP_URL.trim() !== '';
-  if (!isAuto) {
+  if (!isAuto && (!state.webAppUrl || state.webAppUrl.trim() === '')) {
     const enteredUrl = loginApiUrlInput.value.trim();
     if (!enteredUrl) {
       loginErrorMsg.textContent = 'Por favor, informe a URL do Apps Script da planilha.';
