@@ -460,8 +460,8 @@ function switchView(view) {
 function updateSyncBtnState() {
   const syncBtn = document.getElementById('btn-sync-now');
   if (syncBtn) {
-    const isPresident = state.currentUser && state.currentUser.cargo === 'presidente';
-    if (!isPresident) {
+    const isVicentino = state.currentUser && state.currentUser.papelAtual === 'vicentino';
+    if (!isVicentino) {
       syncBtn.disabled = true;
       syncBtn.style.opacity = '0.5';
       syncBtn.style.cursor = 'not-allowed';
@@ -541,7 +541,7 @@ function renderEscalasView() {
 
   btnPrev.style.display = 'block';
 
-  const isDir = state.currentUser && (state.currentUser.cargo === 'presidente' || state.currentUser.cargo === 'vice_presidente');
+  const isDir = state.currentUser && state.currentUser.papelAtual === 'vicentino';
 
   if (state.escalasSubView === 'list') {
     btnPrev.textContent = 'Voltar para Início';
@@ -669,7 +669,7 @@ function renderEscalasListItems() {
 
     const isUserAssigned = state.currentUserId && esc.vicentinos.includes(state.currentUserId);
     const isPendente = esc.status === 'pendente';
-    const canExcluir = state.currentUser && (state.currentUser.cargo === 'presidente' || state.currentUser.cargo === 'vice_presidente');
+    const canExcluir = state.currentUser && state.currentUser.papelAtual === 'vicentino';
 
     // Botão de Iniciar Relato
     let actionBtnHtml = '';

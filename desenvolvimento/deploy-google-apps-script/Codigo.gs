@@ -217,30 +217,29 @@ function doPost(e) {
       return handleLogin(ss, postData.email, postData.passwordHash);
     }
 
-    // VALIDAÇÃO DE SEGURANÇA: Somente o Presidente cadastrado na planilha pode efetuar alterações.
+    // VALIDAÇÃO DE SEGURANÇA: Somente membros (vicentinos) cadastrados na planilha podem efetuar alterações.
     const pessoasSheet = ss.getSheetByName('pessoas');
     const pessoasRows = pessoasSheet.getDataRange().getValues();
     const pessoasHeaders = pessoasRows[0];
-    const cargoColIdx = pessoasHeaders.indexOf('cargo');
-    let currentPresidentId = null;
-
-    if (cargoColIdx !== -1) {
+    const papelColIdx = pessoasHeaders.indexOf('papelAtual');
+    
+    const senderId = postData.senderId ? Number(postData.senderId) : null;
+    let isValidVicentino = false;
+    
+    if (senderId && papelColIdx !== -1) {
       for (let i = 1; i < pessoasRows.length; i++) {
-        if (pessoasRows[i][cargoColIdx] === 'presidente') {
-          currentPresidentId = Number(pessoasRows[i][0]);
+        if (Number(pessoasRows[i][0]) === senderId && pessoasRows[i][papelColIdx] === 'vicentino') {
+          isValidVicentino = true;
           break;
         }
       }
     }
-
-    if (currentPresidentId !== null) {
-      const senderId = postData.senderId ? Number(postData.senderId) : null;
-      if (senderId !== currentPresidentId) {
-        return jsonResponse({ 
-          success: false, 
-          error: 'Permissão negada: Somente o Presidente da conferência pode sincronizar dados e alterar a planilha.' 
-        });
-      }
+    
+    if (!isValidVicentino) {
+      return jsonResponse({ 
+        success: false, 
+        error: 'Permissão negada: Somente membros (vicentinos) cadastrados na planilha podem sincronizar dados.' 
+      });
     }
 
     // Processa cada aba presente no pacote de sincronização
