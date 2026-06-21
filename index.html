@@ -48,19 +48,6 @@
       </div>
     </header>
 
-    <!-- Abas de Navegação Principal (V0.3.5) -->
-    <nav class="filter-tabs" id="main-nav-tabs"
-      style="margin: 0 20px 16px 20px; display: flex; gap: 12px; flex-wrap: wrap;">
-      <button type="button" class="tab-btn active" data-view="flow" id="nav-btn-flow"
-        style="flex: 1; text-align: center; min-height: 44px; padding: 10px 16px; font-size: 1rem;">📋 Registrar
-        Visita</button>
-      <button type="button" class="tab-btn" data-view="pessoas" id="nav-btn-pessoas"
-        style="flex: 1; text-align: center; min-height: 44px; padding: 10px 16px; font-size: 1rem;">👥 Gerenciar
-        Pessoas</button>
-      <button type="button" class="tab-btn" data-view="escalas" id="nav-btn-escalas"
-        style="flex: 1; text-align: center; min-height: 44px; padding: 10px 16px; font-size: 1rem;">📅 Escalas de
-        Visita</button>
-    </nav>
 
     <!-- Card Principal de Fluxo Guiado -->
     <main class="flow-card" id="main-flow-card">
@@ -106,9 +93,10 @@
       </div>
 
       <!-- Ações de Navegação -->
-      <footer class="flow-actions" id="flow-actions-footer">
-        <button class="btn btn-primary" id="btn-next">Iniciar Nova Visita</button>
-        <button class="btn btn-secondary" id="btn-prev" style="display: none;">Voltar</button>
+      <footer class="flow-actions" id="flow-actions-footer" style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; width: 100%;">
+        <button class="btn btn-primary" id="btn-next" style="flex: 1; min-width: 150px; margin: 0;">Iniciar Nova Visita</button>
+        <button class="btn btn-secondary" id="btn-prev" style="display: none; flex: 1; min-width: 150px; margin: 0;">Voltar</button>
+        <button class="btn btn-secondary" id="btn-escalas" style="display: none; flex: 1; min-width: 150px; margin: 0;">📅 Gerenciar Visitas</button>
       </footer>
     </main>
 

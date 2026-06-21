@@ -63,6 +63,7 @@ const flowDesc = document.getElementById('flow-content-desc');
 const formContainer = document.getElementById('dynamic-form-container');
 const btnNext = document.getElementById('btn-next');
 const btnPrev = document.getElementById('btn-prev');
+const btnEscalas = document.getElementById('btn-escalas');
 
 // Inicialização
 document.addEventListener('DOMContentLoaded', async () => {
@@ -804,6 +805,10 @@ function renderApp() {
   updateHeaderUserProfile();
   updateSyncBtnState();
 
+  if (btnEscalas) {
+    btnEscalas.style.display = 'none';
+  }
+
   const isPresident = state.currentUser && state.currentUser.cargo === 'presidente';
   const presidentSection = document.getElementById('president-config-section');
   if (presidentSection) {
@@ -841,14 +846,12 @@ function setupEventListeners() {
     }
   });
 
-  // Eventos das Abas de Navegação Principal
-  const navBtns = document.querySelectorAll('#main-nav-tabs .tab-btn');
-  navBtns.forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      const view = e.currentTarget.getAttribute('data-view');
-      switchView(view);
+  // Evento de clique para o botão de Escalas na barra inferior
+  if (btnEscalas) {
+    btnEscalas.addEventListener('click', () => {
+      switchView('escalas');
     });
-  });
+  }
 
   // Eventos de rede
   window.addEventListener('online', updateNetworkStatus);
@@ -1154,6 +1157,9 @@ function renderFlowView() {
     btnPrev.style.display = 'block';
     btnPrev.textContent = 'Gerenciar Pessoas';
     btnNext.textContent = 'Iniciar Nova Visita';
+    if (btnEscalas) {
+      btnEscalas.style.display = 'block';
+    }
   } else if (state.currentStep === 1) {
     btnPrev.style.display = 'block';
     btnPrev.textContent = 'Voltar para Início';
