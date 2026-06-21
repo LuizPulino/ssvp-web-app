@@ -65,7 +65,8 @@ const btnNext = document.getElementById('btn-next');
 const btnPrev = document.getElementById('btn-prev');
 
 // Inicialização
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  await loadConfig();
   loadData();
   checkAuthAndToggleView();
   renderApp();
@@ -77,6 +78,23 @@ document.addEventListener('DOMContentLoaded', () => {
     runDataSync(true); // silent sync on start
   }
 });
+
+// Carrega a URL do Apps Script do config.json
+async function loadConfig() {
+  try {
+    const response = await fetch('config.json');
+    if (response.ok) {
+      const config = await response.json();
+      if (config.webAppUrl && config.webAppUrl.trim() !== '') {
+        state.webAppUrl = config.webAppUrl.trim();
+        localStorage.setItem(KEYS.WEB_APP_URL, state.webAppUrl);
+      }
+    }
+  } catch (error) {
+    console.warn('config.json não encontrado ou inválido. Usando cache local.');
+  }
+}
+
 
 // Helper para verificar se a justificativa de uma meta não cumprida pode ser editada (limite de 1 dia)
 function isJustificationEditable(meta) {
@@ -266,16 +284,19 @@ function checkAuthAndToggleView() {
     appContainer.style.display = 'none';
     loginScreen.style.display = 'flex';
 
-    // Se a URL já estiver auto-configurada no HTML, preenche e esconde o campo
+    // Se a URL já estiver configurada (por Apps Script auto, por config.json ou por localStorage), esconde o campo
     const isAuto = window.APPS_SCRIPT_WEB_APP_URL &&
       !window.APPS_SCRIPT_WEB_APP_URL.includes('<?=') &&
       window.APPS_SCRIPT_WEB_APP_URL.trim() !== '';
-    if (isAuto) {
+    
+    if (isAuto || (state.webAppUrl && state.webAppUrl.trim() !== '')) {
       loginUrlContainer.style.display = 'none';
-      state.webAppUrl = window.APPS_SCRIPT_WEB_APP_URL.trim();
+      if (isAuto) {
+        state.webAppUrl = window.APPS_SCRIPT_WEB_APP_URL.trim();
+      }
     } else {
       loginUrlContainer.style.display = 'flex';
-      loginApiUrlInput.value = state.webAppUrl || '';
+      loginApiUrlInput.value = '';
     }
   } else {
     appContainer.style.display = 'block';
@@ -782,6 +803,13 @@ function excluirEscala(escalaId) {
 function renderApp() {
   updateHeaderUserProfile();
   updateSyncBtnState();
+
+  const isPresident = state.currentUser && state.currentUser.cargo === 'presidente';
+  const presidentSection = document.getElementById('president-config-section');
+  if (presidentSection) {
+    presidentSection.style.display = isPresident ? 'flex' : 'none';
+  }
+
   if (state.currentView === 'pessoas') {
     renderPessoasView();
   } else if (state.currentView === 'escalas') {
@@ -907,6 +935,31 @@ function setupEventListeners() {
   const btnLogout = document.getElementById('btn-logout');
   if (btnLogout) {
     btnLogout.addEventListener('click', handleLogout);
+  }
+
+  // Evento de Download de Configuração (V0.3.8)
+  const downloadConfigBtn = document.getElementById('btn-download-config');
+  if (downloadConfigBtn) {
+    downloadConfigBtn.addEventListener('click', () => {
+      if (!state.webAppUrl || state.webAppUrl.trim() === '') {
+        alert('Por favor, configure a URL do Apps Script antes de baixar o arquivo.');
+        return;
+      }
+      const configObj = {
+        webAppUrl: state.webAppUrl.trim()
+      };
+      const jsonString = JSON.stringify(configObj, null, 2);
+      const blob = new Blob([jsonString], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'config.json';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    });
   }
 }
 

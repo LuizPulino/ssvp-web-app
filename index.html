@@ -146,6 +146,18 @@
           <span id="sync-status-msg" style="font-size: 0.9rem; font-weight: 600; color: var(--text-muted);">Aguardando
             URL...</span>
         </div>
+
+        <!-- Seção do Presidente para baixar config.json (V0.3.8) -->
+        <div id="president-config-section" style="display: none; flex-direction: column; gap: 8px; border-top: 1px solid var(--surface-border); padding-top: 12px; margin-top: 8px;">
+          <label style="font-size: 0.9rem; font-weight: 700; color: var(--primary);">Distribuição de URL (Presidente)</label>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0 0 4px 0;">
+            Baixe o arquivo de configuração e coloque na raiz do repositório do GitHub para que outros membros não precisem digitar a URL.
+          </p>
+          <button type="button" class="btn btn-primary" id="btn-download-config"
+            style="width: auto; padding: 8px 16px; min-height: 40px; font-size: 0.95rem; display: flex; align-items: center; gap: 8px; margin: 0; align-self: flex-start;">
+            📥 Baixar config.json
+          </button>
+        </div>
       </div>
     </section>
   </div>
@@ -171,7 +183,7 @@
 
       <form id="login-form" style="display: flex; flex-direction: column; gap: 16px;">
         <!-- Campo URL da Planilha (caso não detectada) -->
-        <div id="login-url-container" style="display: flex; flex-direction: column; gap: 6px;">
+        <div id="login-url-container" style="display: none; flex-direction: column; gap: 6px;">
           <label for="login-api-url" style="font-size: 0.95rem; font-weight: 700; color: var(--text-muted);">URL do Web
             App do Apps Script</label>
           <input type="text" id="login-api-url" placeholder="Cole a URL do Apps Script aqui..."
