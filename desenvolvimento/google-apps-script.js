@@ -36,10 +36,10 @@ function checkAndInitializeCopy() {
   const savedId = props.getProperty('SPREADSHEET_ID');
   const dbVersion = props.getProperty('DATABASE_VERSION');
   
-  if (savedId !== currentId || dbVersion !== 'v0.3.7') {
+  if (savedId !== currentId || dbVersion !== 'v0.3.8') {
     initializeDefaultData(ss);
     props.setProperty('SPREADSHEET_ID', currentId);
-    props.setProperty('DATABASE_VERSION', 'v0.3.7');
+    props.setProperty('DATABASE_VERSION', 'v0.3.8');
   }
 }
 
@@ -109,6 +109,15 @@ function initializeDefaultData(ss) {
     [15, 5, 'Pesquisar preços de cesta básica', '2026-06-19', 'nao_cumprida', '', 'Não sobrou tempo livre no final de semana.', '2026-06-19T14:00:00.000Z', '']
   ];
   defaultMetas.forEach(m => metasSheet.appendRow(m));
+
+  // 4. Popular Escalas
+  const escalasSheet = ss.getSheetByName('escalas');
+  const defaultEscalas = [
+    [1, 5, '1,2', '2026-07-10', 'pendente', ''],
+    [2, 6, '1,3', '2026-06-15', 'pendente', ''],
+    [3, 7, '2,4', '2026-06-10', 'realizada', 100]
+  ];
+  defaultEscalas.forEach(e => escalasSheet.appendRow(e));
 }
 
 /**
@@ -299,7 +308,7 @@ function handleLogin(ss, email, passwordHash) {
   const senhaColIdx = headers.indexOf('senha');
   
   if (emailColIdx === -1 || senhaColIdx === -1) {
-    return jsonResponse({ success: false, error: 'Planilha desatualizada. Por favor, atualize o script para a versão v0.3.7.' });
+    return jsonResponse({ success: false, error: 'Planilha desatualizada. Por favor, atualize o script para a versão v0.3.8.' });
   }
   
   const normalizedEmail = email.toString().trim().toLowerCase();

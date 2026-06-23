@@ -31,7 +31,12 @@ const state = {
   },
   isOnline: navigator.onLine, // Detecção de status de rede
   currentUserId: null,       // (V0.3.5) ID do vicentino logado na sessão ativa
-  currentUser: null          // (V0.3.5) Objeto do vicentino logado na sessão ativa
+  currentUser: null,         // (V0.3.5) Objeto do vicentino logado na sessão ativa
+  escalasSubView: 'list',    // 'list' | 'create' (V0.3.8)
+  escalasTab: 'minhas',      // 'minhas' | 'todas' (V0.3.8)
+  escalasOcultarRealizadas: false, // Ocultar visitas já realizadas (V0.3.8)
+  activeEscalaId: null,      // ID da escala sendo executada (V0.3.8)
+  showWelcomeInstructions: true // Exibir/ocultar instruções de uso (V0.3.8)
 };
 
 // Banco de Dados em Memória
@@ -52,7 +57,8 @@ const KEYS = {
   WEB_APP_URL: 'ssvp_web_app_url',
   SYNC_QUEUE: 'ssvp_sync_queue',
   ESCALAS: 'ssvp_escalas',
-  SESSION_USER: 'ssvp_session_user' // (V0.3.7)
+  SESSION_USER: 'ssvp_session_user', // (V0.3.7)
+  SHOW_WELCOME_INSTRUCTIONS: 'ssvp_show_welcome_instructions' // (V0.3.8)
 };
 
 // Elementos do DOM
@@ -221,7 +227,11 @@ function loadData() {
   if (localEscalas) {
     data.escalas = JSON.parse(localEscalas);
   } else {
-    data.escalas = [];
+    data.escalas = [
+      { id: 1, familiaId: 5, vicentinos: [1, 2], dataEscala: '2026-07-10', status: 'pendente', visitaId: null },
+      { id: 2, familiaId: 6, vicentinos: [1, 3], dataEscala: '2026-06-15', status: 'pendente', visitaId: null },
+      { id: 3, familiaId: 7, vicentinos: [2, 4], dataEscala: '2026-06-10', status: 'realizada', visitaId: 100 }
+    ];
     saveData();
   }
 
@@ -233,6 +243,14 @@ function loadData() {
   } else {
     state.currentUser = null;
     state.currentUserId = null;
+  }
+
+  // Carregar preferência de exibição de instruções (V0.3.8)
+  const localShowWelcome = localStorage.getItem(KEYS.SHOW_WELCOME_INSTRUCTIONS);
+  if (localShowWelcome !== null) {
+    state.showWelcomeInstructions = localShowWelcome === 'true';
+  } else {
+    state.showWelcomeInstructions = true;
   }
 
   // Migração e fila única de sync para a V0.3.6 (mantido para compatibilidade de fila)
@@ -267,6 +285,7 @@ function saveData() {
   localStorage.setItem(KEYS.ESCALAS, JSON.stringify(data.escalas));
   localStorage.setItem(KEYS.WEB_APP_URL, state.webAppUrl);
   localStorage.setItem(KEYS.SYNC_QUEUE, JSON.stringify(state.syncQueue));
+  localStorage.setItem(KEYS.SHOW_WELCOME_INSTRUCTIONS, state.showWelcomeInstructions ? 'true' : 'false');
   if (state.currentUser) {
     localStorage.setItem(KEYS.SESSION_USER, JSON.stringify(state.currentUser));
   } else {
@@ -435,6 +454,8 @@ async function handleLoginSubmit(e) {
 // Alternar visualização principal
 function switchView(view) {
   state.currentView = view;
+  state.activeEscalaId = null; // Limpa o contexto da escala ao alternar visualização principal (V0.3.8)
+  
   if (view === 'pessoas') {
     state.pessoasSubView = 'list';
   } else if (view === 'flow') {
@@ -541,7 +562,8 @@ function renderEscalasView() {
 
   btnPrev.style.display = 'block';
 
-  const isDir = state.currentUser && state.currentUser.papelAtual === 'vicentino';
+  // Apenas a diretoria (presidente, vice_presidente, secretario, tesoureiro) cria ou exclui escalas (V0.3.8)
+  const isDir = state.currentUser && ['presidente', 'vice_presidente', 'secretario', 'tesoureiro'].includes(state.currentUser.cargo);
 
   if (state.escalasSubView === 'list') {
     btnPrev.textContent = 'Voltar para Início';
@@ -564,14 +586,47 @@ function renderEscalasView() {
     flowDesc.textContent = 'Consulte as visitas agendadas pela diretoria da conferência.';
 
     const escalasWrapper = document.createElement('div');
-    escalasWrapper.style.cssText = 'display: flex; flex-direction: column; gap: 16px; width: 100%;';
+    escalasWrapper.style.cssText = 'display: flex; flex-direction: column; gap: 12px; width: 100%;';
+
+    // Abas de filtro: Minhas Escalas / Todas as Escalas
+    const filterTabs = document.createElement('div');
+    filterTabs.className = 'filter-tabs';
+    filterTabs.style.cssText = 'margin-bottom: 4px;';
+    filterTabs.innerHTML = `
+      <button class="tab-btn ${state.escalasTab === 'minhas' ? 'active' : ''}" data-tab="minhas">Minhas Escalas</button>
+      <button class="tab-btn ${state.escalasTab === 'todas' ? 'active' : ''}" data-tab="todas">Todas as Escalas</button>
+    `;
+
+    // Checkbox para ocultar realizadas
+    const filterCheckboxLabel = document.createElement('label');
+    filterCheckboxLabel.style.cssText = 'display: inline-flex; align-items: center; gap: 10px; font-size: 1.05rem; font-weight: 600; cursor: pointer; padding: 4px 0; color: var(--text-main); margin-bottom: 8px;';
+    filterCheckboxLabel.innerHTML = `
+      <input type="checkbox" id="escalas-hide-completed" ${state.escalasOcultarRealizadas ? 'checked' : ''} style="width: 22px; height: 22px; cursor: pointer;">
+      <span>Ocultar visitas já realizadas</span>
+    `;
 
     const listContainer = document.createElement('div');
     listContainer.id = 'escalas-list-container';
     listContainer.style.cssText = 'display: flex; flex-direction: column; gap: 12px;';
 
+    escalasWrapper.appendChild(filterTabs);
+    escalasWrapper.appendChild(filterCheckboxLabel);
     escalasWrapper.appendChild(listContainer);
     formContainer.appendChild(escalasWrapper);
+
+    // Event listeners para os filtros
+    filterTabs.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        state.escalasTab = e.currentTarget.getAttribute('data-tab');
+        renderApp();
+      });
+    });
+
+    const checkboxInput = filterCheckboxLabel.querySelector('#escalas-hide-completed');
+    checkboxInput.addEventListener('change', (e) => {
+      state.escalasOcultarRealizadas = e.target.checked;
+      renderApp();
+    });
 
     renderEscalasListItems();
 
@@ -654,8 +709,26 @@ function renderEscalasListItems() {
     return;
   }
 
+  const todayStr = new Date().toISOString().split('T')[0];
+
+  // 1. Filtrar por aba (Minhas vs Todas)
+  let filtered = activeEscalas;
+  if (state.escalasTab === 'minhas' && state.currentUserId) {
+    filtered = filtered.filter(esc => esc.vicentinos.includes(state.currentUserId));
+  }
+
+  // 2. Filtrar por realizada (Ocultar Realizadas)
+  if (state.escalasOcultarRealizadas) {
+    filtered = filtered.filter(esc => esc.status !== 'realizada');
+  }
+
+  if (filtered.length === 0) {
+    container.innerHTML = '<p style="text-align: center; color: var(--text-muted); padding: 24px;">Nenhuma escala encontrada com os filtros selecionados.</p>';
+    return;
+  }
+
   // Ordena por data decrescente
-  const sorted = [...activeEscalas].sort((a, b) => new Date(b.dataEscala) - new Date(a.dataEscala));
+  const sorted = [...filtered].sort((a, b) => new Date(b.dataEscala) - new Date(a.dataEscala));
 
   sorted.forEach(esc => {
     const fam = data.pessoas.find(p => p.id === esc.familiaId);
@@ -669,7 +742,40 @@ function renderEscalasListItems() {
 
     const isUserAssigned = state.currentUserId && esc.vicentinos.includes(state.currentUserId);
     const isPendente = esc.status === 'pendente';
-    const canExcluir = state.currentUser && state.currentUser.papelAtual === 'vicentino';
+    const isAtrasada = isPendente && esc.dataEscala < todayStr;
+    const canExcluir = state.currentUser && ['presidente', 'vice_presidente', 'secretario', 'tesoureiro'].includes(state.currentUser.cargo);
+
+    // Configurar cores e badges de atraso / pendente / realizada
+    let badgeHtml = '';
+    let cardBorder = 'var(--surface-border)';
+    let cardBackground = 'var(--surface)';
+
+    if (isPendente) {
+      if (isAtrasada) {
+        badgeHtml = `
+          <span class="badge" style="background-color: hsla(354, 70%, 45%, 0.15); color: var(--danger); font-size: 0.85rem; text-transform: uppercase; display: inline-flex; align-items: center; gap: 4px;">
+            ⚠️ Atrasada
+          </span>
+        `;
+        cardBorder = 'var(--danger)';
+        cardBackground = 'hsla(354, 70%, 45%, 0.02)';
+      } else {
+        badgeHtml = `
+          <span class="badge badge-visitante" style="font-size: 0.85rem; text-transform: uppercase;">
+            Pendente
+          </span>
+        `;
+        if (isUserAssigned) {
+          cardBorder = 'var(--primary)';
+        }
+      }
+    } else {
+      badgeHtml = `
+        <span class="badge badge-benfeitor" style="font-size: 0.85rem; text-transform: uppercase;">
+          Realizada
+        </span>
+      `;
+    }
 
     // Botão de Iniciar Relato
     let actionBtnHtml = '';
@@ -704,33 +810,31 @@ function renderEscalasListItems() {
 
     const card = document.createElement('div');
     card.style.cssText = `
-    background: var(--surface);
-    border: 2px solid ${isUserAssigned && isPendente ? 'var(--primary)' : 'var(--surface-border)'};
-    border-radius: var(--border-radius-md);
-    padding: 18px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    box-shadow: var(--shadow-sm);
-  `;
+      background: ${cardBackground};
+      border: 2px solid ${cardBorder};
+      border-radius: var(--border-radius-md);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: var(--shadow-sm);
+    `;
 
     card.innerHTML = `
-    <div style="display: flex; justify-content: space-between; align-items: start; gap: 8px; flex-wrap: wrap;">
-      <div>
-        <span style="font-size: 0.9rem; font-weight: 700; color: var(--text-muted);">📅 Data Planejada: ${esc.dataEscala}</span>
-        <h4 style="margin: 4px 0; font-size: 1.25rem; font-family: 'Outfit', sans-serif; color: var(--text-main);">${famName} <span style="font-size: 0.95rem; font-weight: normal; color: var(--text-muted);">${famBairro}</span></h4>
-        <p style="margin: 0; font-size: 1.05rem; color: var(--text-main);"><strong>Dupla Designada:</strong> ${vicNames}</p>
+      <div style="display: flex; justify-content: space-between; align-items: start; gap: 8px; flex-wrap: wrap;">
+        <div>
+          <span style="font-size: 0.9rem; font-weight: 700; color: var(--text-muted);">📅 Data Planejada: ${esc.dataEscala}</span>
+          <h4 style="margin: 4px 0; font-size: 1.25rem; font-family: 'Outfit', sans-serif; color: var(--text-main);">${famName} <span style="font-size: 0.95rem; font-weight: normal; color: var(--text-muted);">${famBairro}</span></h4>
+          <p style="margin: 0; font-size: 1.05rem; color: var(--text-main);"><strong>Dupla Designada:</strong> ${vicNames}</p>
+        </div>
+        ${badgeHtml}
       </div>
-      <span class="badge ${isPendente ? 'badge-visitante' : 'badge-benfeitor'}" style="font-size: 0.8rem; text-transform: uppercase;">
-        ${isPendente ? 'Pendente' : 'Realizada'}
-      </span>
-    </div>
-    
-    <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 4px; border-top: 1px solid var(--surface-border); padding-top: 10px;">
-      ${actionBtnHtml}
-      ${deleteBtnHtml}
-    </div>
-  `;
+      
+      <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 4px; border-top: 1px solid var(--surface-border); padding-top: 10px;">
+        ${actionBtnHtml}
+        ${deleteBtnHtml}
+      </div>
+    `;
 
     container.appendChild(card);
   });
@@ -1007,6 +1111,14 @@ function handleFlowNext() {
     }
     state.selectedFamily = parseInt(selectedFamRadio.value);
 
+    // Se mudou de família em relação à escala ativa, desvincula a escala (V0.3.8)
+    if (state.activeEscalaId) {
+      const esc = data.escalas.find(e => e.id === state.activeEscalaId);
+      if (esc && esc.familiaId !== state.selectedFamily) {
+        state.activeEscalaId = null;
+      }
+    }
+
     // Inicializar validação das metas pendentes da família selecionada
     state.goalValidations = {};
     const pendentes = data.metas.filter(m => m.familiaId === state.selectedFamily && m.status === 'pendente');
@@ -1154,6 +1266,7 @@ function renderFlowView() {
   }
 
   if (state.currentStep === 0) {
+    state.activeEscalaId = null; // Garante que a escala ativa é limpa ao retornar para a tela inicial (V0.3.8)
     btnPrev.style.display = 'block';
     btnPrev.textContent = 'Gerenciar Pessoas';
     btnNext.textContent = 'Iniciar Nova Visita';
@@ -1181,20 +1294,46 @@ function renderFlowView() {
     flowDesc.textContent = 'Acompanhe e registre visitas vicentinas de forma simples, acessível e totalmente offline.';
 
     const welcomeCard = document.createElement('div');
-    welcomeCard.style.cssText = 'background: var(--primary-light); padding: 20px; border-radius: var(--border-radius-md); border-left: 5px solid var(--primary); box-shadow: var(--shadow-sm);';
-    welcomeCard.innerHTML = `
-    <h3 style="font-size: 1.25rem; color: var(--primary); margin-bottom: 8px; font-family: 'Outfit', sans-serif;">O que este aplicativo faz?</h3>
-    <p style="font-size: 1.05rem; color: var(--text-main); margin-bottom: 16px; line-height: 1.5;">
-      Auxilia conferências vicentinas a registrar relatos de visitas, acompanhar metas de promoção social para as famílias e sincronizar tudo com o Google Sheets, mesmo trabalhando sem conexão à internet.
-    </p>
-    <h3 style="font-size: 1.25rem; color: var(--primary); margin-bottom: 8px; font-family: 'Outfit', sans-serif;">Como usar em 3 passos simples:</h3>
-    <ol style="margin-left: 20px; font-size: 1.05rem; color: var(--text-main); display: flex; flex-direction: column; gap: 10px; line-height: 1.4;">
-      <li><strong>Escolha a Dupla:</strong> Selecione os confrades e consócias que farão a visita (mínimo de 2).</li>
-      <li><strong>Selecione a Família:</strong> Escolha o lar assistido cadastrado.</li>
-      <li><strong>Registre a Conversa:</strong> Digite o relato da visita e acompanhe/crie metas.</li>
-    </ol>
-  `;
+    welcomeCard.style.cssText = 'background: var(--surface); border: 2px solid var(--surface-border); border-radius: var(--border-radius-md); box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 12px; padding: 20px;';
+
+    const toggleHeader = document.createElement('div');
+    toggleHeader.style.cssText = 'display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none;';
+    toggleHeader.innerHTML = `
+      <h3 style="font-size: 1.25rem; color: var(--primary); margin: 0; font-family: 'Outfit', sans-serif; display: flex; align-items: center; gap: 8px;">
+        ℹ️ Instruções de Uso
+      </h3>
+      <span id="instructions-toggle-icon" style="font-size: 1.25rem; color: var(--text-muted); font-weight: bold;">
+        ${state.showWelcomeInstructions ? '▲' : '▼'}
+      </span>
+    `;
+
+    const instructionsContent = document.createElement('div');
+    instructionsContent.style.cssText = `display: ${state.showWelcomeInstructions ? 'flex' : 'none'}; flex-direction: column; gap: 16px; border-top: 1px solid var(--surface-border); padding-top: 16px;`;
+    instructionsContent.innerHTML = `
+      <p style="font-size: 1.05rem; color: var(--text-main); line-height: 1.5; margin: 0;">
+        Auxilia conferências vicentinas a registrar relatos de visitas, acompanhar metas de promoção social para as famílias e sincronizar tudo com o Google Sheets, mesmo trabalhando sem conexão à internet.
+      </p>
+      <div>
+        <h4 style="font-size: 1.15rem; color: var(--primary); margin-bottom: 8px; font-family: 'Outfit', sans-serif;">Como usar em 3 passos simples:</h4>
+        <ol style="margin-left: 20px; font-size: 1.05rem; color: var(--text-main); display: flex; flex-direction: column; gap: 8px; line-height: 1.4;">
+          <li><strong>Escolha a Dupla:</strong> Selecione os confrades e consócias que farão a visita (mínimo de 2).</li>
+          <li><strong>Selecione a Família:</strong> Escolha o lar assistido cadastrado.</li>
+          <li><strong>Registre a Conversa:</strong> Digite o relato da visita e acompanhe/crie metas.</li>
+        </ol>
+      </div>
+    `;
+
+    welcomeCard.appendChild(toggleHeader);
+    welcomeCard.appendChild(instructionsContent);
     formContainer.appendChild(welcomeCard);
+
+    toggleHeader.addEventListener('click', () => {
+      state.showWelcomeInstructions = !state.showWelcomeInstructions;
+      const isOpen = state.showWelcomeInstructions;
+      instructionsContent.style.display = isOpen ? 'flex' : 'none';
+      toggleHeader.querySelector('#instructions-toggle-icon').textContent = isOpen ? '▲' : '▼';
+      saveData();
+    });
 
   } else if (state.currentStep === 1) {
     flowTitle.textContent = 'Selecione a Dupla (Confrades/Consócias)';
