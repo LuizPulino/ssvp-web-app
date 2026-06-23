@@ -218,6 +218,13 @@ function setupWelcomeSheet(ss) {
  */
 function initSpreadsheet() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
+  
+  // Garante que a aba de Boas-vindas ("Início") existe e está formatada (V0.3.9)
+  let inicioSheet = ss.getSheetByName('Início');
+  if (!inicioSheet || inicioSheet.getLastRow() === 0) {
+    setupWelcomeSheet(ss);
+  }
+
   for (const sheetName in SCHEMAS) {
     let sheet = ss.getSheetByName(sheetName);
     if (!sheet) {
