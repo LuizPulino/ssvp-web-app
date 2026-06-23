@@ -134,7 +134,7 @@ function setupWelcomeSheet(ss) {
     sheet = ss.insertSheet('Início', 0); // Insere no início (índice 0)
   }
   
-  sheet.setHideGridlines(true);
+  sheet.setHiddenGridlines(true);
   
   // Título do painel
   sheet.getRange("A1:G2").merge();
