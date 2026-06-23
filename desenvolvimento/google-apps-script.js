@@ -36,10 +36,10 @@ function checkAndInitializeCopy() {
   const savedId = props.getProperty('SPREADSHEET_ID');
   const dbVersion = props.getProperty('DATABASE_VERSION');
   
-  if (savedId !== currentId || dbVersion !== 'v0.3.8') {
+  if (savedId !== currentId || dbVersion !== 'v0.3.9') {
     initializeDefaultData(ss);
     props.setProperty('SPREADSHEET_ID', currentId);
-    props.setProperty('DATABASE_VERSION', 'v0.3.8');
+    props.setProperty('DATABASE_VERSION', 'v0.3.9');
   }
 }
 
@@ -118,6 +118,99 @@ function initializeDefaultData(ss) {
     [3, 7, '2,4', '2026-06-10', 'realizada', 100]
   ];
   defaultEscalas.forEach(e => escalasSheet.appendRow(e));
+
+  // Criar aba de Boas-vindas/Instruções como aba principal (V0.3.9)
+  setupWelcomeSheet(ss);
+}
+
+/**
+ * Cria a aba de Boas-vindas ("Início") e as instruções de uso formatadas (V0.3.9)
+ */
+function setupWelcomeSheet(ss) {
+  let sheet = ss.getSheetByName('Início');
+  if (sheet) {
+    sheet.clear();
+  } else {
+    sheet = ss.insertSheet('Início', 0); // Insere no início (índice 0)
+  }
+  
+  sheet.setHideGridlines(true);
+  
+  // Título do painel
+  sheet.getRange("A1:G2").merge();
+  sheet.getRange("A1").setValue("✨ SSVP Gestão - Painel de Controle & Instruções ✨")
+    .setFontSize(14)
+    .setFontWeight("bold")
+    .setFontColor("#ffffff")
+    .setBackground("#1e58c7")
+    .setHorizontalAlignment("center")
+    .setVerticalAlignment("middle");
+
+  // Boas-vindas
+  sheet.getRange("A4").setValue("Bem-vindo(a) à Planilha de Gestão da Conferência Local!")
+    .setFontSize(12)
+    .setFontWeight("bold")
+    .setFontColor("#1e58c7");
+
+  sheet.getRange("A5").setValue("Esta planilha funciona como o banco de dados central do aplicativo web no celular. Todos os relatos de visitas, metas e escalas criados pelos vicentinos no aplicativo são salvos aqui de forma automática.")
+    .setFontSize(10.5)
+    .setFontColor("#2c3e50");
+
+  // Alerta de modificação manual
+  sheet.getRange("A7").setValue("⚠️ Avisos Importantes (Leia antes de alterar qualquer célula):")
+    .setFontSize(11)
+    .setFontWeight("bold")
+    .setFontColor("#c0392b");
+
+  const avisos = [
+    "1. NÃO altere o nome de nenhuma das outras abas (pessoas, historico_papeis, visitas, metas, escalas). O aplicativo depende desses nomes exatos.",
+    "2. NÃO altere ou delete os cabeçalhos azuis (linha 1) das outras abas. Isso corrompe a importação e sincronização dos dados.",
+    "3. Se você precisar cadastrar um vicentino ou assistido manualmente por aqui, certifique-se de preencher todas as colunas obrigatórias.",
+    "4. A coluna 'senha' na aba 'pessoas' utiliza criptografia SHA-256 para manter as credenciais seguras. Não insira senhas em texto puro diretamente ali.",
+    "5. Após qualquer edição direta nesta planilha, lembre-se de clicar em 'Sincronizar Agora' no aplicativo do celular para recarregar as alterações locais."
+  ];
+
+  avisos.forEach((aviso, idx) => {
+    sheet.getRange(8 + idx, 1).setValue(aviso)
+      .setFontSize(10)
+      .setFontColor("#34495e");
+  });
+
+  // Links e utilitários
+  sheet.getRange("A14").setValue("🔗 Links do Sistema:")
+    .setFontSize(11)
+    .setFontWeight("bold")
+    .setFontColor("#1e58c7");
+
+  let appUrl = "";
+  try {
+    appUrl = ScriptApp.getService().getUrl();
+  } catch (err) {}
+
+  if (appUrl && !appUrl.includes('<?=') && appUrl.trim() !== '') {
+    sheet.getRange("A15").setValue("Acesse o Aplicativo:")
+      .setFontSize(10)
+      .setFontWeight("bold");
+    sheet.getRange("B15").setFormula(`=HYPERLINK("${appUrl}", "Abrir SSVP Gestão ↗")`)
+      .setFontSize(10)
+      .setFontColor("#1e58c7")
+      .setFontLine("underline");
+  } else {
+    sheet.getRange("A15").setValue("URL de Produção:")
+      .setFontSize(10)
+      .setFontWeight("bold");
+    sheet.getRange("B15").setValue("Carregada após implantar como Aplicativo da Web.")
+      .setFontSize(10)
+      .setFontColor("#7f8c8d")
+      .setFontStyle("italic");
+  }
+
+  // Ajuste de largura da coluna A
+  sheet.setColumnWidth(1, 750);
+  
+  // Formatando a seção inteira
+  sheet.getRange("A3:G3").setBackground("#f8f9fa");
+  sheet.getRange("A13:G13").setBackground("#f8f9fa");
 }
 
 /**
@@ -308,7 +401,7 @@ function handleLogin(ss, email, passwordHash) {
   const senhaColIdx = headers.indexOf('senha');
   
   if (emailColIdx === -1 || senhaColIdx === -1) {
-    return jsonResponse({ success: false, error: 'Planilha desatualizada. Por favor, atualize o script para a versão v0.3.8.' });
+    return jsonResponse({ success: false, error: 'Planilha desatualizada. Por favor, atualize o script para a versão v0.3.9.' });
   }
   
   const normalizedEmail = email.toString().trim().toLowerCase();
